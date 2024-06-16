@@ -1,0 +1,44 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
+
+    - name: Deploy to Azure VM
+      run: |
+        ssh -o StrictHostKeyChecking=no abodoo@20.0.80.2 << 'EOF'
+          if [ -d "/home/abodoo/api/.git" ]; then
+            cd /home/abodoo/api || { echo "Failed to navigate to project directory"; exit 1; }
+            git pull origin main || { echo "Git pull failed"; exit 1; }
+          else
+            if [ -d "/home/abodoo/api" ]; then
+              rm -rf /home/abodoo/api || { echo "Failed to remove existing directory"; exit 1; }
+            fi
+            mkdir -p /home/abodoo/api
+            cd /home/abodoo/api
+            git clone https://github.com/lokeshRhibhus/gabor-skill-extractor.git api || { echo "Git clone failed"; exit 1; }
+            api
+          fi
+
+          git status || { echo "Failed to check Git status"; exit 1; }
+          sudo systemctl daemon-reload || { echo "Systemctl daemon-reload failed"; exit 1; }
+          sudo systemctl restart nginx || { echo "Systemctl restart nginx failed"; exit 1; }
+        EOF
+
+
