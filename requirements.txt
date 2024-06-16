@@ -1,0 +1,8 @@
+python-dotenv
+neofuzz
+embetter
+openai
+gliner
+fastapi
+uvicorn
+pydantic
