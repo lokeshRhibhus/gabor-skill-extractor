@@ -20,10 +20,6 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
 
-    - name: Debug SSH connection
-      run: |
-        ssh -vvv -o StrictHostKeyChecking=no -i ${{ secrets.AZURE_VM_SSH_KEY }} abodoo@20.0.80.2
-
     - name: Deploy to Azure VM
       run: |
         ssh -o StrictHostKeyChecking=no -i ${{ secrets.AZURE_VM_SSH_KEY }} abodoo@20.0.80.2 << 'EOF'
