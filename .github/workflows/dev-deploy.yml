@@ -20,9 +20,12 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.AZURE_VM_SSH_KEY }}
 
+    - name: Debug SSH connection
+      run: ssh -vvv -o StrictHostKeyChecking=no -i ${{ secrets.AZURE_VM_SSH_KEY }} abodoo@20.0.80.2
+
     - name: Deploy to Azure VM
       run: |
-        ssh -o StrictHostKeyChecking=no abodoo@20.0.80.2 << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i ${{ secrets.AZURE_VM_SSH_KEY }} abodoo@20.0.80.2 << 'EOF'
           if [ -d "/home/abodoo/api/.git" ]; then
             cd /home/abodoo/api || { echo "Failed to navigate to project directory"; exit 1; }
             git pull origin main || { echo "Git pull failed"; exit 1; }
@@ -32,8 +35,7 @@ jobs:
             fi
             mkdir -p /home/abodoo/api
             cd /home/abodoo/api
-            git clone https://github.com/lokeshRhibhus/gabor-skill-extractor.git api || { echo "Git clone failed"; exit 1; }
-            api
+            git clone https://github.com/lokeshRhibhus/gabor-skill-extractor.git . || { echo "Git clone failed"; exit 1; }
           fi
 
           git status || { echo "Failed to check Git status"; exit 1; }
